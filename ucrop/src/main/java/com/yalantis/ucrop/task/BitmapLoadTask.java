@@ -97,7 +97,11 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
         final ParcelFileDescriptor parcelFileDescriptor;
         try {
-            parcelFileDescriptor = mContext.getContentResolver().openFileDescriptor(mInputUri, "r");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                parcelFileDescriptor = mContext.getContentResolver().openFile(mInputUri, "r", null);
+            } else {
+                parcelFileDescriptor = mContext.getContentResolver().openFileDescriptor(mInputUri, "r");
+            }
         } catch (FileNotFoundException e) {
             return new BitmapWorkerResult(e);
         }
@@ -171,11 +175,16 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
                 throw e;
             }
         } else if ("content".equals(inputUriScheme)) {
-            try {
-                copyFile(mInputUri, mOutputUri);
-            } catch (NullPointerException | IOException e) {
-                Log.e(TAG, "Copying failed", e);
-                throw e;
+            String path = getFilePath();
+            if (!TextUtils.isEmpty(path) && new File(path).exists()) {
+                mInputUri = Uri.fromFile(new File(path));
+            } else {
+                try {
+                    copyFile(mInputUri, mOutputUri);
+                } catch (NullPointerException | IOException e) {
+                    Log.e(TAG, "Copying failed", e);
+                    throw e;
+                }
             }
         } else if (!"file".equals(inputUriScheme)) {
             Log.e(TAG, "Invalid Uri scheme " + inputUriScheme);
