@@ -97,7 +97,11 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
         final ParcelFileDescriptor parcelFileDescriptor;
         try {
-            parcelFileDescriptor = mContext.getContentResolver().openFileDescriptor(mInputUri, "r");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                parcelFileDescriptor = mContext.getContentResolver().openFile(mInputUri, "r", null);
+            } else {
+                parcelFileDescriptor = mContext.getContentResolver().openFileDescriptor(mInputUri, "r");
+            }
         } catch (FileNotFoundException e) {
             return new BitmapWorkerResult(e);
         }
@@ -171,6 +175,11 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
                 throw e;
             }
         } else if ("content".equals(inputUriScheme)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //No need to process this uri
+                return;
+            }
+
             String path = getFilePath();
             if (!TextUtils.isEmpty(path) && new File(path).exists()) {
                 mInputUri = Uri.fromFile(new File(path));
