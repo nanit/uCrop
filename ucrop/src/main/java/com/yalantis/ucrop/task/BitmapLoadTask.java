@@ -175,19 +175,20 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
                 throw e;
             }
         } else if ("content".equals(inputUriScheme)) {
-            Log.d("UCrop", "content input");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //No need to process this uri
+                return;
+            }
             String path = getFilePath();
             if (!TextUtils.isEmpty(path) && new File(path).exists()) {
-                Log.d("UCrop", "found path");
-//                mInputUri = Uri.fromFile(new File(path));
+                mInputUri = Uri.fromFile(new File(path));
             } else {
-                Log.d("UCrop", "copying files");
-//                try {
-//                    copyFile(mInputUri, mOutputUri);
-//                } catch (NullPointerException | IOException e) {
-//                    Log.e(TAG, "Copying failed", e);
-//                    throw e;
-//                }
+                try {
+                    copyFile(mInputUri, mOutputUri);
+                } catch (NullPointerException | IOException e) {
+                    Log.e(TAG, "Copying failed", e);
+                    throw e;
+                }
             }
         } else if (!"file".equals(inputUriScheme)) {
             Log.e(TAG, "Invalid Uri scheme " + inputUriScheme);
