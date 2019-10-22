@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.yalantis.ucrop.model.AspectRatio;
 
@@ -62,6 +63,7 @@ public class UCrop {
      * @param destination Uri for saving the cropped image
      */
     public static UCrop of(@NonNull Uri source, @NonNull Uri destination) {
+        Log.d("UCrop", "commit #2");
         return new UCrop(source, destination);
     }
 
