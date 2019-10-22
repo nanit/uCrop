@@ -53,6 +53,7 @@ public class TransformImageView extends AppCompatImageView {
     private int mMaxBitmapSize = 0;
 
     private String mImageInputPath, mImageOutputPath;
+    private Uri mImageOutputUri;
     private ExifInfo mExifInfo;
 
     /**
@@ -126,6 +127,10 @@ public class TransformImageView extends AppCompatImageView {
         return mImageOutputPath;
     }
 
+    public Uri getImageOutputUri() {
+        return mImageOutputUri;
+    }
+
     public ExifInfo getExifInfo() {
         return mExifInfo;
     }
@@ -136,7 +141,7 @@ public class TransformImageView extends AppCompatImageView {
      * @param imageUri - image Uri
      * @throws Exception - can throw exception if having problems with decoding Uri or OOM.
      */
-    public void setImageUri(@NonNull Uri imageUri, @Nullable Uri outputUri) throws Exception {
+    public void setImageUri(@NonNull Uri imageUri, @Nullable final Uri outputUri) throws Exception {
         int maxBitmapSize = getMaxBitmapSize();
 
         BitmapLoadUtils.decodeBitmapInBackground(getContext(), imageUri, outputUri, maxBitmapSize, maxBitmapSize,
@@ -146,6 +151,7 @@ public class TransformImageView extends AppCompatImageView {
                     public void onBitmapLoaded(@NonNull Bitmap bitmap, @NonNull ExifInfo exifInfo, @NonNull String imageInputPath, @Nullable String imageOutputPath) {
                         mImageInputPath = imageInputPath;
                         mImageOutputPath = imageOutputPath;
+                        mImageOutputUri = outputUri;
                         mExifInfo = exifInfo;
 
                         mBitmapDecoded = true;

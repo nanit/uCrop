@@ -53,6 +53,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
     private final String mImageInputPath, mImageOutputPath;
     private final ExifInfo mExifInfo;
     private final BitmapCropCallback mCropCallback;
+    private final Uri mImageOutputUri;
 
     private int mCroppedImageWidth, mCroppedImageHeight;
     private int cropOffsetX, cropOffsetY;
@@ -76,6 +77,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
 
         mImageInputPath = cropParameters.getImageInputPath();
         mImageOutputPath = cropParameters.getImageOutputPath();
+        mImageOutputUri = cropParameters.getImageOutputUri();
         mExifInfo = cropParameters.getExifInfo();
 
         mCropCallback = cropCallback;
@@ -176,7 +178,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
 
         OutputStream outputStream = null;
         try {
-            outputStream = context.getContentResolver().openOutputStream(Uri.fromFile(new File(mImageOutputPath)));
+            outputStream = context.getContentResolver().openOutputStream(mImageOutputUri);
             croppedBitmap.compress(mCompressFormat, mCompressQuality, outputStream);
             croppedBitmap.recycle();
         } finally {
@@ -207,8 +209,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
     protected void onPostExecute(@Nullable Throwable t) {
         if (mCropCallback != null) {
             if (t == null) {
-                Uri uri = Uri.fromFile(new File(mImageOutputPath));
-                mCropCallback.onBitmapCropped(uri, cropOffsetX, cropOffsetY, mCroppedImageWidth, mCroppedImageHeight);
+                mCropCallback.onBitmapCropped(mImageOutputUri, cropOffsetX, cropOffsetY, mCroppedImageWidth, mCroppedImageHeight);
             } else {
                 mCropCallback.onCropFailure(t);
             }
