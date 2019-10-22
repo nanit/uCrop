@@ -63,7 +63,7 @@ public class UCrop {
      * @param destination Uri for saving the cropped image
      */
     public static UCrop of(@NonNull Uri source, @NonNull Uri destination) {
-        Log.d("UCrop", "commit #2");
+        Log.d("UCrop", "commit #3");
         return new UCrop(source, destination);
     }
 
