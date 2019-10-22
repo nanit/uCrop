@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import com.yalantis.ucrop.callback.BitmapCropCallback;
@@ -147,9 +148,12 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
         Log.i(TAG, "Should crop: " + shouldCrop);
 
         if (shouldCrop) {
-            ExifInterface originalExif = new ExifInterface(mImageInputPath);
+            ExifInterface originalExif = null;
+            if (shouldCopyExif()) {
+                originalExif = new ExifInterface(mImageInputPath);
+            }
             saveImage(Bitmap.createBitmap(mViewBitmap, cropOffsetX, cropOffsetY, mCroppedImageWidth, mCroppedImageHeight));
-            if (mCompressFormat.equals(Bitmap.CompressFormat.JPEG)) {
+            if (mCompressFormat.equals(Bitmap.CompressFormat.JPEG) && originalExif != null) {
                 ImageHeaderParser.copyExif(originalExif, mCroppedImageWidth, mCroppedImageHeight, mImageOutputPath);
             }
             return true;
@@ -157,6 +161,11 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
             FileUtils.copyFile(mImageInputPath, mImageOutputPath);
             return false;
         }
+    }
+
+    private boolean shouldCopyExif() {
+        //This is a dirty fix since we don't need this now. Hoping this library will send a proper fix for Android Q
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
     }
 
     private void saveImage(@NonNull Bitmap croppedBitmap) throws FileNotFoundException {
