@@ -167,7 +167,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
 
     private boolean shouldCopyExif() {
         //This is a dirty fix since we don't need this now. Hoping this library will send a proper fix for Android Q
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
+        return false;
     }
 
     private void saveImage(@NonNull Bitmap croppedBitmap) throws FileNotFoundException {
