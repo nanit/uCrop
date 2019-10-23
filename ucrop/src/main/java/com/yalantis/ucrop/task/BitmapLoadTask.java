@@ -3,6 +3,7 @@ package com.yalantis.ucrop.task;
 import android.Manifest.permission;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -175,7 +177,7 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
                 throw e;
             }
         } else if ("content".equals(inputUriScheme)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (isFromFileProvider()) {
                 //No need to process this uri
                 return;
             }
@@ -187,14 +189,28 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
                 try {
                     copyFile(mInputUri, mOutputUri);
                 } catch (NullPointerException | IOException e) {
-                    Log.e(TAG, "Copying failed", e);
-                    throw e;
+                    Log.e(TAG, "Copying failed, trying with original input", e);
+                    return;
                 }
             }
         } else if (!"file".equals(inputUriScheme)) {
             Log.e(TAG, "Invalid Uri scheme " + inputUriScheme);
             throw new IllegalArgumentException("Invalid Uri scheme" + inputUriScheme);
         }
+    }
+
+    private boolean isFromFileProvider() {
+        Cursor cursor = mContext.getContentResolver().query(mInputUri, null, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                return true;
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return false;
     }
 
     private String getFilePath() {
